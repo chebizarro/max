@@ -18,27 +18,28 @@
  */
 package speech
 
-// AudioSource A source of audio data.
-type AudioSource interface {
-}
+import (
+	"testing"
 
-// Microphone : A microphone the can be a source of audio data.
-type Microphone interface {
-}
+	"github.com/xlab/portaudio-go/portaudio"
+)
 
-// AudioFile : An audio file is a source of audio data.
-type AudioFile interface {
-}
-
-// AudioData : represents data returned by an AudioSource
-type AudioData struct {
-	frameData   []byte
-	sampleRate  float64
-	sampleWidth int
-}
-
-// Recognizer : a Recognizer takes AudioData and returns a textual representation
-type Recognizer interface {
-	Destroy()
-	GetResult() string
+func TestPortaudioSource_Close(t *testing.T) {
+	type fields struct {
+		stream *portaudio.Stream
+	}
+	tests := []struct {
+		name   string
+		fields fields
+	}{
+		// TODO: Add test cases.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			pa := &PortaudioSource{
+				stream: tt.fields.stream,
+			}
+			pa.Close()
+		})
+	}
 }

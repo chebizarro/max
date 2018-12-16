@@ -18,27 +18,36 @@
  */
 package speech
 
-// AudioSource A source of audio data.
-type AudioSource interface {
+import (
+	google "cloud.google.com/go/speech/apiv1"
+	"golang.org/x/net/context"
+)
+
+type GoogleRecognizer struct {
+	client  *google.Client
+	context context.Context
 }
 
-// Microphone : A microphone the can be a source of audio data.
-type Microphone interface {
+func NewGoogleRecognizer() (*GoogleRecognizer, error) {
+
+	ctx := context.Background()
+
+	client, err := google.NewClient(ctx)
+
+	if err != nil {
+		return nil, err
+	}
+
+	gr := GoogleRecognizer{client: client, context: ctx}
+
+	return &gr, nil
 }
 
-// AudioFile : An audio file is a source of audio data.
-type AudioFile interface {
+func (gr *GoogleRecognizer) Destroy() {
+	// does nothing
 }
 
-// AudioData : represents data returned by an AudioSource
-type AudioData struct {
-	frameData   []byte
-	sampleRate  float64
-	sampleWidth int
-}
-
-// Recognizer : a Recognizer takes AudioData and returns a textual representation
-type Recognizer interface {
-	Destroy()
-	GetResult() string
+// GetResult returns the result of the speech analysis
+func (gr *GoogleRecognizer) GetResult() string {
+	return ""
 }

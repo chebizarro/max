@@ -16,29 +16,33 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package speech
 
-// AudioSource A source of audio data.
-type AudioSource interface {
-}
+import (
+	"reflect"
+	"testing"
+)
 
-// Microphone : A microphone the can be a source of audio data.
-type Microphone interface {
-}
-
-// AudioFile : An audio file is a source of audio data.
-type AudioFile interface {
-}
-
-// AudioData : represents data returned by an AudioSource
-type AudioData struct {
-	frameData   []byte
-	sampleRate  float64
-	sampleWidth int
-}
-
-// Recognizer : a Recognizer takes AudioData and returns a textual representation
-type Recognizer interface {
-	Destroy()
-	GetResult() string
+func TestNewSphinxRecognizer(t *testing.T) {
+	tests := []struct {
+		name    string
+		want    *SphinxRecognizer
+		wantErr bool
+	}{
+		// TODO: Add test cases.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := NewSphinxRecognizer()
+			if (err != nil) != tt.wantErr {
+				t.Errorf("NewSphinxRecognizer() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("NewSphinxRecognizer() = %v, want %v", got, tt.want)
+			}
+			got.Destroy()
+		})
+	}
 }
