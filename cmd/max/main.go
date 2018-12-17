@@ -17,30 +17,39 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
- package main
+package main
 
- import (
-	 "sync"
- )
+import (
+	"sync"
 
- func main() {
+	"github.com/chebizarro/max/pkg/speech"
+)
+
+func main() {
 
 	var wg sync.WaitGroup
 
 	wg.Add(1)
-	go listenerWorker(wg)
+	go listenerWorker(&wg)
 
 	wg.Wait()
 
+}
 
- }
+func listenerWorker(wg *sync.WaitGroup) {
 
- func listenerWorker(wg *sync.WaitGroup) {
+	buffer := make(chan []int16, 1024)
+
+	audio := speech.NewPortAudioSource(buffer)
+
+	recognizer, _ := speech.NewSphinxRecognizer()
+
+	recognizer.DecodeStream(buffer)
 
 	defer func() {
+		recognizer.Destroy()
+		audio.Destroy()
 		wg.Done()
 	}()
 
-
-
- }
+}

@@ -19,15 +19,19 @@
 package speech
 
 import (
-	google "cloud.google.com/go/speech/apiv1"
 	"golang.org/x/net/context"
+
+	google "cloud.google.com/go/speech/apiv1"
+	speechpb "google.golang.org/genproto/googleapis/cloud/speech/v1"
 )
 
+// GoogleRecognizer a Recognizer for the Google Speech API
 type GoogleRecognizer struct {
 	client  *google.Client
 	context context.Context
 }
 
+// NewGoogleRecognizer returns a newly initialized GoogleRecognizer
 func NewGoogleRecognizer() (*GoogleRecognizer, error) {
 
 	ctx := context.Background()
@@ -43,11 +47,22 @@ func NewGoogleRecognizer() (*GoogleRecognizer, error) {
 	return &gr, nil
 }
 
+// Destroy disposes of any resources
 func (gr *GoogleRecognizer) Destroy() {
 	// does nothing
 }
 
 // GetResult returns the result of the speech analysis
 func (gr *GoogleRecognizer) GetResult() string {
-	return ""
+
+	req := &speechpb.RecognizeRequest{
+		// TODO: Fill request struct fields.
+	}
+
+	resp, err := gr.client.Recognize(gr.context, req)
+	if err != nil {
+		// TODO: Handle error.
+	}
+
+	return resp.String()
 }

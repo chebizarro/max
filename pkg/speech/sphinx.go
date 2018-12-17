@@ -27,7 +27,8 @@ import (
 
 // SphinxRecognizer The CMU Sphinx Recognizer
 type SphinxRecognizer struct {
-	dec *sphinx.Decoder
+	dec                  *sphinx.Decoder
+	uttStarted, inSpeech bool
 }
 
 // NewSphinxRecognizer returns a pointer to a new SphinxRecognizer instance
@@ -45,6 +46,7 @@ func NewSphinxRecognizer() (*SphinxRecognizer, error) {
 		sphinx.DictFileOption(dict),
 		sphinx.LMFileOption(lm),
 		sphinx.SampleRateOption(sampleRate),
+		sphinx.LogFileOption("/dev/null"),
 	)
 
 	log.Println("Loading CMU PhocketSphinx.")
@@ -57,6 +59,52 @@ func NewSphinxRecognizer() (*SphinxRecognizer, error) {
 
 	return &SphinxRecognizer{dec: dec}, nil
 
+}
+
+// DecodeStream decodes a stream from a channel of []int16
+func (sr *SphinxRecognizer) DecodeStream(stream chan []int16) {
+
+	if !sr.dec.StartUtt() {
+		log.Println("[ERR] Sphinx failed to start utterance")
+		return
+	}
+
+	for result := range stream {
+
+		_, ok := sr.dec.ProcessRaw(result, false, false)
+
+		if !ok {
+			log.Println("Error processing text")
+			return
+		}
+
+		if sr.dec.IsInSpeech() {
+			sr.inSpeech = true
+			if !sr.uttStarted {
+				sr.uttStarted = true
+				log.Println("Listening..")
+			}
+		} else if sr.uttStarted {
+			// speech -> silence transition, time to start new utterance
+			sr.dec.EndUtt()
+			sr.uttStarted = false
+			sr.report() // report results
+			if !sr.dec.StartUtt() {
+				log.Println("[ERR] Sphinx failed to start utterance")
+				return
+			}
+		}
+
+	}
+}
+
+func (sr *SphinxRecognizer) report() {
+	hyp, _ := sr.dec.Hypothesis()
+	if len(hyp) > 0 {
+		log.Printf("    > hypothesis: %s", hyp)
+		return
+	}
+	log.Println("ah, nothing")
 }
 
 // Destroy releases the CMU Sphinx instance
